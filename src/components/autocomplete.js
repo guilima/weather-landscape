@@ -31,7 +31,7 @@ class Autocomplete extends Component {
     }
     const photos = place.photos
       .filter(photo => photo.width > 2000)
-      .map(photo => photo.getUrl({ maxWidth: 6000, maxHeight: 6000 }));
+      .map(photo => photo.getUrl({ maxWidth: 3200, maxHeight: 3200 }));
     console.log("fotos", photos);
     this.props.setCollection(photos);
   }
@@ -43,7 +43,9 @@ class Autocomplete extends Component {
       .catch(e => console.error(e));
   }
   render() {
-    return <input ref={input => (this.searchInput = input)} />;
+    return (
+      <input className="searchBar" ref={input => (this.searchInput = input)} />
+    );
   }
 }
 
