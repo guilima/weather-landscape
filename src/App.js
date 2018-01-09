@@ -9,7 +9,8 @@ class App extends Component {
     super(props);
 
     this.state = {
-      images: []
+      images: [],
+      address: ""
     };
   }
   render() {
@@ -19,11 +20,18 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
         </header>
-        <Autocomplete setCollection={images => this.setState({ images })} />
+        <Autocomplete
+          setCollection={(images, address) =>
+            this.setState({
+              images,
+              address
+            })
+          }
+        />
         <p className="App-intro">
           To get started, edit <code>src/App.js</code> and save to reload.
         </p>
-        <Landscape collection={this.state.images} />
+        <Landscape collection={this.state.images} city={this.state.address} />
       </div>
     );
   }

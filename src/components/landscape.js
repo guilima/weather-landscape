@@ -1,10 +1,10 @@
 import React from "react";
 
-const Landscape = ({ collection }) => {
+const Landscape = ({ collection, city }) => {
   if (!Array.isArray(collection) || collection.length === 0)
     return <div>No image</div>;
   const images = collection.map((image, index) => (
-    <img src={image} key={index} />
+    <img src={image} key={index} alt={'Locate in ' + city} />
   ));
   return <div className="video-list media">{images}</div>;
 };

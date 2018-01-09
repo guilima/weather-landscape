@@ -29,11 +29,12 @@ class Autocomplete extends Component {
       window.alert("No details available for input: '" + place.name + "'");
       return;
     }
-    const photos = place.photos
-      .filter(photo => photo.width > 2000)
-      .map(photo => photo.getUrl({ maxWidth: 3200, maxHeight: 3200 }));
+    const address = place.formatted_address,
+      photos = place.photos
+        .filter(photo => photo.width > 2000)
+        .map(photo => photo.getUrl({ maxWidth: 3200, maxHeight: 3200 }));
     console.log("fotos", photos);
-    this.props.setCollection(photos);
+    this.props.setCollection(photos, address);
   }
   componentDidMount() {
     loadjs(
