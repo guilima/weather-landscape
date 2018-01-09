@@ -31,8 +31,10 @@ class Autocomplete extends Component {
     }
     const address = place.formatted_address,
       photos = place.photos
-        .filter(photo => photo.width > 2000)
-        .map(photo => photo.getUrl({ maxWidth: 3200, maxHeight: 3200 }));
+        ? place.photos
+            .filter(photo => photo.width > 2000)
+            .map(photo => photo.getUrl({ maxWidth: 3200, maxHeight: 3200 }))
+        : place;
     console.log("fotos", photos);
     this.props.setCollection(photos, address);
   }
@@ -44,15 +46,20 @@ class Autocomplete extends Component {
       .catch(e => console.error(e));
   }
   render() {
-    return <React.Fragment>
-        <input className="searchBar" ref={input => (this.searchInput = input)} />
+    return (
+      <React.Fragment>
+        <input
+          className="searchBar"
+          ref={input => (this.searchInput = input)}
+        />
         <div className="search-explore-text">
           <small>
             Explore cities around the world and find more about weather
             conditions
           </small>
         </div>
-      </React.Fragment>;
+      </React.Fragment>
+    );
   }
 }
 
