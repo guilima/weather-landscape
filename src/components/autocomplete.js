@@ -44,9 +44,15 @@ class Autocomplete extends Component {
       .catch(e => console.error(e));
   }
   render() {
-    return (
-      <input className="searchBar" ref={input => (this.searchInput = input)} />
-    );
+    return <React.Fragment>
+        <input className="searchBar" ref={input => (this.searchInput = input)} />
+        <div className="search-explore-text">
+          <small>
+            Explore cities around the world and find more about weather
+            conditions
+          </small>
+        </div>
+      </React.Fragment>;
   }
 }
 
