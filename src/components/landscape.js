@@ -5,7 +5,17 @@ const Landscape = ({ collection, city }) => {
   const images = collection.map((image, index) => (
     <img src={image} key={index} alt={"Locate in " + city} />
   ));
-  return <div className="video-list media">{images}</div>;
+  return (
+    <div className="media-slide">
+      <div className="media-slide-arrow arrow-left">
+        <button className="btn-arrow" />
+      </div>
+      <div className="slider">{images}</div>
+      <div className="media-slide-arrow arrow-right">
+        <button className="btn-arrow" />
+      </div>
+    </div>
+  );
 };
 
 export default Landscape;
