@@ -34,7 +34,7 @@ class Autocomplete extends Component {
         ? place.photos
             .filter(photo => photo.width > 2000)
             .map(photo => photo.getUrl({ maxWidth: 3200, maxHeight: 3200 }))
-        : place;
+        : [];
     console.log("fotos", photos);
     this.props.setCollection(photos, address);
   }
