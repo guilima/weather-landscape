@@ -15,15 +15,17 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Autocomplete
-          setCollection={(images, address) =>
-            this.setState({
-              images,
-              address
-            })
-          }
-        />
         <Landscape collection={this.state.images} city={this.state.address} />
+        <div className="app-content">
+          <Autocomplete
+            setCollection={(images, address) =>
+              this.setState({
+                images,
+                address
+              })
+            }
+          />
+        </div>
       </div>
     );
   }
