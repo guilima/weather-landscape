@@ -1,0 +1,16 @@
+.pac-container {
+  .pac-item {
+    line-height: 3;
+    font-size: 12px;
+    &-query {
+      font-size: 14px;
+    }
+  }
+  .pac-icon {
+    margin-top: 10px;
+  }
+  &:after {
+    margin: 5px;
+    opacity: 0.8;
+  }
+}
