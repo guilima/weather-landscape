@@ -1,57 +1,160 @@
 import React, { Component } from "react";
-import loadjs from "./../helpers/loadjs";
 
 class Autocomplete extends Component {
   constructor(props) {
     super(props);
+    this.getpredictionsList = this.getpredictionsList.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
+    this.handleFocus = this.handleFocus.bind(this);
     this.state = {
-      googleapisOk: false
+      predictions: [],
+      searchTerm: "",
+      show: false
     };
   }
-  componentWillUpdate(nextProps, nextState) {
-    if (this.state.googleapisOk !== nextState.googleapisOk) {
-      console.log("show", nextState);
-      const googleapisPlaces = new window.google.maps.places.Autocomplete(
-        this.searchInput,
-        { types: ["(cities)"] }
+
+  getpredictionsList(searchTerm) {
+    this.setState({ searchTerm }, function() {
+      if (!this.state.searchTerm) {
+        this.setState({
+          predictions: []
+        });
+        return;
+      }
+      var service = new window.google.maps.places.AutocompleteService();
+      service.getPlacePredictions(
+        { input: searchTerm, types: ["(cities)"] },
+        displaySuggestions
       );
-      googleapisPlaces.addListener("place_changed", () =>
-        this.showAutocomplete(googleapisPlaces)
-      );
+    });
+
+    const displaySuggestions = (predictions, status) => {
+      if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
+        console.warn(status);
+        return;
+      }
+      //console.log(predictions);
+      this.setState({
+        show: true,
+        predictions: predictions.map(prediction => {
+          const {
+            place_id,
+            structured_formatting: {
+              main_text_matched_substrings,
+              secondary_text_matched_substrings,
+              main_text,
+              secondary_text
+            }
+          } = prediction;
+          return {
+            place_id,
+            city: {
+              name: main_text,
+              matchedSubstring: main_text_matched_substrings
+                ? main_text.substring(
+                    main_text_matched_substrings[0].offset,
+                    main_text_matched_substrings[0].length
+                  )
+                : null
+            },
+            estate: {
+              name: secondary_text,
+              matchedSubstring: secondary_text_matched_substrings
+                ? secondary_text.substring(
+                    secondary_text_matched_substrings[0].offset,
+                    secondary_text_matched_substrings[0].length
+                  )
+                : null
+            }
+          };
+        })
+      });
+    };
+  }
+
+  handleBlur() {
+    if (this.state.searchTerm && this.state.predictions.length > 0) {
+      this.setState({ show: false });
     }
   }
-  showAutocomplete(googleapisPlaces) {
-    var place = googleapisPlaces.getPlace();
-    console.log("lugar", place);
-    if (!place.geometry) {
-      // User entered the name of a Place that was not suggested and
-      // pressed the Enter key, or the Place Details request failed.
-      window.alert("No details available for input: '" + place.name + "'");
-      return;
+
+  handleFocus() {
+    if (this.state.searchTerm && this.state.predictions.length > 0) {
+      this.setState({ show: true });
     }
-    const address = place.formatted_address,
-      photos = place.photos
-        ? place.photos
-            .filter(photo => photo.width > 2000)
-            .map(photo => photo.getUrl({ maxWidth: 3200, maxHeight: 3200 }))
-        : [];
-    console.log("fotos", photos);
-    this.props.setCollection(photos, address);
   }
-  componentDidMount() {
-    loadjs(
-      "https://maps.googleapis.com/maps/api/js?key=AIzaSyDi34mA0m-tmJqwWwFsaowmbzKrTkUCg9Y&libraries=places&language=pt-br"
-    )
-      .then(() => this.setState({ googleapisOk: true }))
-      .catch(e => console.error(e));
+
+  getPlaceDetail(place_id) {
+    const service = new window.google.maps.places.PlacesService(
+      document.createElement("div")
+    );
+    service.getDetails({ placeId: place_id }, (place, status) => {
+      if (!place.geometry) {
+        window.alert("No details available for input: '" + place.name + "'");
+        return;
+      }
+      const address = place.formatted_address,
+        photos = place.photos
+          ? place.photos
+              .filter(photo => photo.width > 2000)
+              .map(photo => photo.getUrl({ maxWidth: 3200, maxHeight: 3200 }))
+          : [];
+      this.props.setCollection(photos, address);
+      this.setState({ searchTerm: address, predictions: [] });
+    });
   }
+
   render() {
+    console.log("inside autocomplete");
+    const predictionsList = predictions => {
+      return (
+        <div className="pac-container pac-logo">
+          {predictions.map((prediction, index) => {
+            const { city, estate, place_id } = prediction;
+            return (
+              <div
+                className="pac-item"
+                onMouseDown={() => this.getPlaceDetail(place_id)}
+                key={place_id}
+              >
+                <span className="pac-icon pac-icon-marker" />
+                <span className="pac-item-query">
+                  {city.matchedSubstring ? <b>{city.matchedSubstring}</b> : ""}
+                  {city.matchedSubstring
+                    ? city.name.replace(city.matchedSubstring, "")
+                    : city.name}
+                </span>
+                <span>
+                  {estate.matchedSubstring ? (
+                    <b>{estate.matchedSubstring}</b>
+                  ) : (
+                    ""
+                  )}
+                  {estate.matchedSubstring
+                    ? estate.name.replace(estate.matchedSubstring, "")
+                    : estate.name}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    };
+
     return (
       <React.Fragment>
-        <input
-          className="searchBar"
-          ref={input => (this.searchInput = input)}
-        />
+        <div>
+          <input
+            placeholder="Digite um local"
+            autoComplete="off"
+            className="searchBar"
+            onBlur={this.handleBlur}
+            onFocus={this.handleFocus}
+            value={this.state.searchTerm}
+            onChange={e => this.getpredictionsList(e.target.value)}
+          />
+          {this.state.show ? predictionsList(this.state.predictions) : ""}
+        </div>
         <div className="search-explore-text">
           <small>
             Explore cities around the world and find more about weather
