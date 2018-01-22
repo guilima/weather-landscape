@@ -4,7 +4,8 @@ import { debounce } from "lodash";
 class Autocomplete extends Component {
   constructor(props) {
     super(props);
-    this.getpredictionsList = this.getpredictionsList.bind(this);
+    this.getDebouncePredictions = debounce(this.getDebouncePredictions, 300);
+    this.handleSearchChange = this.handleSearchChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
     this.handleFocus = this.handleFocus.bind(this);
     this.state = {
@@ -14,21 +15,8 @@ class Autocomplete extends Component {
     };
   }
 
-  getpredictionsList(searchTerm) {
-    this.setState({ searchTerm }, function() {
-      if (!this.state.searchTerm) {
-        this.setState({
-          predictions: []
-        });
-        return;
-      }
-      var service = new window.google.maps.places.AutocompleteService();
-      service.getPlacePredictions(
-        { input: searchTerm, types: ["(cities)"] },
-        displaySuggestions
-      );
-    });
-
+  getDebouncePredictions(searchTerm) {
+    const service = new window.google.maps.places.AutocompleteService();
     const displaySuggestions = (predictions, status) => {
       if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
         console.warn(status);
@@ -71,6 +59,23 @@ class Autocomplete extends Component {
         })
       });
     };
+    if (!searchTerm) {
+      this.setState({
+        predictions: []
+      });
+      return;
+    }
+
+    service.getPlacePredictions(
+      { input: searchTerm, types: ["(cities)"] },
+      displaySuggestions
+    );
+  }
+
+  handleSearchChange(searchTerm) {
+    this.setState({ searchTerm }, () => {
+      this.getDebouncePredictions(searchTerm);
+    });
   }
 
   handleBlur() {
@@ -85,7 +90,7 @@ class Autocomplete extends Component {
     }
   }
 
-  getPlaceDetail(place_id) {
+  setCollectionProps(place_id) {
     const service = new window.google.maps.places.PlacesService(
       document.createElement("div")
     );
@@ -115,7 +120,7 @@ class Autocomplete extends Component {
             return (
               <div
                 className="pac-item"
-                onMouseDown={() => this.getPlaceDetail(place_id)}
+                onMouseDown={() => this.setCollectionProps(place_id)}
                 key={place_id}
               >
                 <span className="pac-icon pac-icon-marker" />
@@ -152,7 +157,7 @@ class Autocomplete extends Component {
             onBlur={this.handleBlur}
             onFocus={this.handleFocus}
             value={this.state.searchTerm}
-            onChange={e => this.getpredictionsList(e.target.value)}
+            onChange={e => this.handleSearchChange(e.target.value)}
           />
           {this.state.show ? predictionsList(this.state.predictions) : ""}
         </div>
