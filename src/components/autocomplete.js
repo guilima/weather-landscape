@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { debounce } from "lodash";
 
 class Autocomplete extends Component {
   constructor(props) {
